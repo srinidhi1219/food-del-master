@@ -1,12 +1,18 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 
 const Success = () => {
+  const location = useLocation();
+  const orderId = location.state?.orderId;
+
   return (
     <div className="flex-grow bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg text-center">
         <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-6" />
         <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Order Confirmed!</h2>
+        {orderId && (
+          <p className="text-sm text-gray-500 mb-2">Order ID: <span className="font-mono">{orderId}</span></p>
+        )}
         <p className="text-gray-600 mb-8">
           Your payment was successful. Your delicious food is being prepared and will be delivered to you shortly.
         </p>

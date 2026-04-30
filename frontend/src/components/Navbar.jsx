@@ -30,7 +30,12 @@ const Navbar = () => {
             
             {user ? (
               <div className="flex items-center space-x-4">
-                <Link to="/profile" className="flex items-center text-sm font-medium text-gray-700 hover:text-orange-600 transition-colors hidden sm:flex">
+                {(user.role === 'SUPER_ADMIN' || user.role === 'RESTAURANT_ADMIN') && (
+                  <Link to="/admin" className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-colors hidden sm:flex">
+                    Admin Dashboard
+                  </Link>
+                )}
+                <Link to="/profile" className="hidden sm:inline-flex items-center text-sm font-medium text-gray-700 hover:text-orange-600 transition-colors">
                   <UserIcon className="h-4 w-4 mr-1" />
                   Hi, {user.name}
                 </Link>
@@ -44,6 +49,9 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-2">
+                <Link to="/vendor-register" className="text-gray-600 hover:text-orange-600 font-medium px-3 py-2 rounded-md transition-colors hidden sm:flex">
+                  Become a vendor
+                </Link>
                 <Link to="/login" className="text-gray-600 hover:text-orange-600 font-medium px-3 py-2 rounded-md transition-colors">
                   Login
                 </Link>

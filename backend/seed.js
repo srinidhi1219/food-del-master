@@ -4,6 +4,7 @@ const Food = require('./models/Food');
 const Restaurant = require('./models/Restaurant');
 const User = require('./models/User');
 const Order = require('./models/Order');
+const bcrypt = require('bcryptjs');
 
 dotenv.config();
 
@@ -12,50 +13,7 @@ mongoose
     .then(() => console.log('Connected to MongoDB'))
     .catch((err) => console.error('MongoDB connection error:', err));
 
-const restaurantsData = [
-    {
-        name: 'Babai Hotel',
-        description: 'Authentic South Indian tiffins and meals.',
-        image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
-        rating: +(Math.random() * (5.0 - 3.5) + 3.5).toFixed(1),
-        deliveryTime: '20-30 min'
-    },
-    {
-        name: 'Minerva Coffee Shop',
-        description: 'A classic spot for comforting South Indian cuisine.',
-        image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800',
-        rating: +(Math.random() * (5.0 - 3.5) + 3.5).toFixed(1),
-        deliveryTime: '30-40 min'
-    },
-    {
-        name: 'Sweet Magic',
-        description: 'Known for delightful sweets, bakery items, and meals.',
-        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=800',
-        rating: +(Math.random() * (5.0 - 3.5) + 3.5).toFixed(1),
-        deliveryTime: '25-35 min'
-    },
-    {
-        name: 'Crossroads Restaurant',
-        description: 'Flavorful Biryani and spicy Andhra specialties.',
-        image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800',
-        rating: +(Math.random() * (5.0 - 3.5) + 3.5).toFixed(1),
-        deliveryTime: '35-45 min'
-    },
-    {
-        name: 'Barkaas Arabic Restaurant',
-        description: 'Popular for authentic Mandi and Middle Eastern delicacies.',
-        image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800',
-        rating: +(Math.random() * (5.0 - 3.5) + 3.5).toFixed(1),
-        deliveryTime: '40-50 min'
-    },
-    {
-        name: 'Ironhill Cafe',
-        description: 'A vibrant cafe serving loaded burgers, pizzas, and shakes.',
-        image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800',
-        rating: +(Math.random() * (5.0 - 3.5) + 3.5).toFixed(1),
-        deliveryTime: '30-45 min'
-    }
-];
+const getRandomRating = () => +(Math.random() * (5.0 - 3.5) + 3.5).toFixed(1);
 
 const seedDB = async () => {
     try {
@@ -63,6 +21,71 @@ const seedDB = async () => {
         await Food.deleteMany({});
         await User.deleteMany({});
         await Order.deleteMany({});
+
+        // Default admin accounts for managing restaurants/items
+        // Password for all seeded admins: admin123
+        const salt = await bcrypt.genSalt(10);
+        const adminPasswordHash = await bcrypt.hash('admin123', salt);
+        const admins = await User.insertMany([
+            { name: 'Super Admin', email: 'superadmin@foodieexpress.com', password: adminPasswordHash, role: 'SUPER_ADMIN' },
+            { name: 'Babai Admin', email: 'babai.admin@foodieexpress.local', password: adminPasswordHash, role: 'RESTAURANT_ADMIN' },
+            { name: 'Minerva Admin', email: 'minerva.admin@foodieexpress.local', password: adminPasswordHash, role: 'RESTAURANT_ADMIN' },
+            { name: 'Sweet Magic Admin', email: 'sweetmagic.admin@foodieexpress.local', password: adminPasswordHash, role: 'RESTAURANT_ADMIN' },
+            { name: 'Crossroads Admin', email: 'crossroads.admin@foodieexpress.local', password: adminPasswordHash, role: 'RESTAURANT_ADMIN' },
+            { name: 'Barkaas Admin', email: 'barkaas.admin@foodieexpress.local', password: adminPasswordHash, role: 'RESTAURANT_ADMIN' },
+            { name: 'Ironhill Admin', email: 'ironhill.admin@foodieexpress.local', password: adminPasswordHash, role: 'RESTAURANT_ADMIN' }
+        ]);
+
+        const restaurantsData = [
+            {
+                ownerId: admins[1]._id,
+                name: 'Babai Hotel',
+                description: 'Authentic South Indian tiffins and meals.',
+                image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
+                rating: getRandomRating(),
+                deliveryTime: '20-30 min'
+            },
+            {
+                ownerId: admins[2]._id,
+                name: 'Minerva Coffee Shop',
+                description: 'A classic spot for comforting South Indian cuisine.',
+                image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800',
+                rating: getRandomRating(),
+                deliveryTime: '30-40 min'
+            },
+            {
+                ownerId: admins[3]._id,
+                name: 'Sweet Magic',
+                description: 'Known for delightful sweets, bakery items, and meals.',
+                image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=800',
+                rating: getRandomRating(),
+                deliveryTime: '25-35 min'
+            },
+            {
+                ownerId: admins[4]._id,
+                name: 'Crossroads Restaurant',
+                description: 'Flavorful Biryani and spicy Andhra specialties.',
+                image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=800',
+                rating: getRandomRating(),
+                deliveryTime: '35-45 min'
+            },
+            {
+                ownerId: admins[5]._id,
+                name: 'Barkaas Arabic Restaurant',
+                description: 'Popular for authentic Mandi and Middle Eastern delicacies.',
+                image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800',
+                rating: getRandomRating(),
+                deliveryTime: '40-50 min'
+            },
+            {
+                ownerId: admins[6]._id,
+                name: 'Ironhill Cafe',
+                description: 'A vibrant cafe serving loaded burgers, pizzas, and shakes.',
+                image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800',
+                rating: getRandomRating(),
+                deliveryTime: '30-45 min'
+            }
+        ];
 
         const createdRestaurants = await Restaurant.insertMany(restaurantsData);
 

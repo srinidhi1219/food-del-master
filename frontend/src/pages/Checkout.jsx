@@ -14,11 +14,9 @@ const Checkout = () => {
     address: '',
     city: '',
     zip: '',
-    cardNumber: '',
-    expiry: '',
-    cvv: ''
   });
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
@@ -26,10 +24,10 @@ const Checkout = () => {
     if (!user) {
       navigate('/login');
     }
-    if (cart.length === 0) {
+    if (cart.length === 0 && !isSuccess) {
       navigate('/cart');
     }
-  }, [user, cart, navigate]);
+  }, [user, cart, navigate, isSuccess]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -40,6 +38,18 @@ const Checkout = () => {
     setLoading(true);
     
     try {
+      // Safety check: cart must contain items from a single restaurant
+      const restaurantIds = new Set(
+        cart
+          .map((item) => (typeof item.restaurant === 'string' ? item.restaurant : item.restaurant?._id))
+          .filter(Boolean)
+      );
+      if (restaurantIds.size > 1) {
+        setLoading(false);
+        alert('You can only checkout items from one restaurant. Please clear the cart and try again.');
+        return;
+      }
+
       const orderItems = cart.map(item => ({
         food: item._id,
         quantity: item.quantity
@@ -47,15 +57,16 @@ const Checkout = () => {
       
       const deliveryAddress = `${formData.address}, ${formData.city}, ${formData.zip}`;
       
-      await axios.post('/api/orders', {
+      const { data } = await axios.post('/api/orders', {
         items: orderItems,
         totalAmount,
         deliveryAddress
       });
       
       setLoading(false);
+      setIsSuccess(true);
       clearCart();
-      navigate('/success');
+      navigate('/success', { state: { orderId: data?._id } });
     } catch (error) {
       console.error('Checkout failed', error);
       setLoading(false);
@@ -63,7 +74,7 @@ const Checkout = () => {
     }
   };
 
-  if (!user || cart.length === 0) return null;
+  if (!user || (cart.length === 0 && !isSuccess)) return null;
 
   return (
     <div className="flex-grow bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -127,39 +138,10 @@ const Checkout = () => {
               </div>
 
               <div className="pt-4 border-t border-gray-200">
-                <h3 className="text-lg font-bold mb-3 text-gray-900">Payment Details</h3>
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    name="cardNumber"
-                    required
-                    maxLength="16"
-                    placeholder="Card Number (16 digits)"
-                    value={formData.cardNumber}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-                  />
-                  <div className="flex space-x-4">
-                    <input
-                      type="text"
-                      name="expiry"
-                      required
-                      placeholder="MM/YY"
-                      value={formData.expiry}
-                      onChange={handleChange}
-                      className="w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-                    />
-                    <input
-                      type="text"
-                      name="cvv"
-                      required
-                      maxLength="4"
-                      placeholder="CVV"
-                      value={formData.cvv}
-                      onChange={handleChange}
-                      className="w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-                    />
-                  </div>
+                <h3 className="text-lg font-bold mb-1 text-gray-900">Payment</h3>
+                <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-4">
+                  <p className="text-sm text-amber-800 font-medium">🎓 Demo Mode — Simulated Payment</p>
+                  <p className="text-xs text-amber-700 mt-1">No real card data is collected. Clicking "Place Order" will confirm your order immediately. In production, integrate Razorpay or Stripe.</p>
                 </div>
               </div>
 
@@ -168,7 +150,7 @@ const Checkout = () => {
                 disabled={loading}
                 className="w-full py-3 bg-orange-600 text-white font-bold rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50 mt-6"
               >
-                {loading ? 'Processing Payment...' : `Pay ${formatInr(totalAmount)}`}
+                {loading ? 'Processing...' : `Place Order — ${formatInr(totalAmount)}`}
               </button>
             </form>
           </div>

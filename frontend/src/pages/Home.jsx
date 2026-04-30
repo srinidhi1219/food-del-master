@@ -39,10 +39,11 @@ const Home = () => {
     return matchesSearch && matchesCategory;
   });
 
+  // Fix #16: use spread copy to avoid mutating state-derived array in place
   if (sortBy === 'price-low') {
-    filteredFoods.sort((a, b) => a.price - b.price);
+    filteredFoods = [...filteredFoods].sort((a, b) => a.price - b.price);
   } else if (sortBy === 'price-high') {
-    filteredFoods.sort((a, b) => b.price - a.price);
+    filteredFoods = [...filteredFoods].sort((a, b) => b.price - a.price);
   }
 
   return (

@@ -5,16 +5,20 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VendorRegister from './pages/VendorRegister';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Success from './pages/Success';
 import Profile from './pages/Profile';
 import RestaurantDetail from './pages/RestaurantDetail';
+import AdminDashboard from './pages/AdminDashboard';
 import useAuthStore from './store/useAuthStore';
 import axios from 'axios';
 
 // Configure axios defaults
-axios.defaults.baseURL = 'http://localhost:5001';
+// Prefer Vite dev proxy (no baseURL) unless explicitly configured.
+// Set `VITE_API_BASE_URL=http://localhost:5001` if you want to bypass the proxy.
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || '';
 axios.defaults.withCredentials = true;
 
 function App() {
@@ -41,11 +45,13 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+            <Route path="/vendor-register" element={user ? <Navigate to="/" /> : <VendorRegister />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/success" element={<Success />} />
             <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
             <Route path="/restaurant/:id" element={<RestaurantDetail />} />
+            <Route path="/admin" element={(user?.role === 'SUPER_ADMIN' || user?.role === 'RESTAURANT_ADMIN') ? <AdminDashboard /> : <Navigate to="/login" />} />
           </Routes>
         </main>
         <Footer />

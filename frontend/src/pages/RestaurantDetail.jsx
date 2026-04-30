@@ -120,7 +120,7 @@ const RestaurantDetail = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
                   <select 
                     value={rating} 
-                    onChange={(e) => setRating(e.target.value)}
+                    onChange={(e) => setRating(Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500"
                   >
                     <option value="5">5 - Excellent</option>
