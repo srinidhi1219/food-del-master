@@ -1,6 +1,3 @@
-Here’s a **clean, professional GitHub README (fu
-
----
 
 # 🍔 Online Food Delivery Web Application
 
