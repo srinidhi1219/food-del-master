@@ -1,4 +1,4 @@
-Here’s a **clean, professional GitHub README (full copy-paste ready)** based on your document :
+Here’s a **clean, professional GitHub README (fu
 
 ---
 
